@@ -2,6 +2,7 @@
 import MovieCard from './components/MovieCard';
 // import { useState } from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import MovieDetail from './components/MovieDetail';
 
 function App() {
   // const [movie, setMovie] = useState([]);
@@ -16,8 +17,10 @@ function App() {
         </header>
         <Routes>
           <Route path="/" element={<MovieCard />} />
+          <Route path="/MovieDetail/" element={<MovieDetail />} />
+          {/* <Route path="/MovieDetail/:id" element={<MovieDetail />} /> */}
         </Routes>
-        <footer className="flex justify-start bg-indigo-900 text-white font-bold items-center h-10">
+        <footer className="flex justify-start bg-indigo-900  text-white font-bold items-center h-10">
           <p className="m-1 p-1 text-lg">㉿ GIGABOX</p>
         </footer>
       </div>
