@@ -1,3 +1,5 @@
+//! 더미 데이터 - 구조객체 분할 이용해서 데이터 호출
+
 import React from 'react';
 import MovieDetailData from '../const/data/MovieDetailData.json';
 // import { useParams } from 'react-router-dom';
