@@ -3,10 +3,7 @@
 
 ========================
 participants 
-1. Sunmyung Woo
-2. 
-
-
+1. Sunmyung Woo (우선명)
 ========================
 
 TailwindCSS 쓰실분들은 참고
@@ -43,3 +40,4 @@ Currently, two official plugins are available:
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 >>>>>>> 44e1e3a (Feat: First  Commit)
+
