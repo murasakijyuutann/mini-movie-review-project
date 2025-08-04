@@ -1,4 +1,6 @@
-//! 더미 데이터 - 구조객체 분할 이용해서 데이터 호출
+//! 더미 데이터 - 구조 분할 이용해서 데이터 호출
+//! 구조 분할된 객체 데이터를 각각 렌더링
+//! 장르의 경우 객체 안의 배열이기 때문에, 배열을 map으로 반복렌더링
 
 import React from 'react';
 import MovieDetailData from '../const/data/MovieDetailData.json';
