@@ -8,6 +8,7 @@ export default function Login() {
 
   const [error, setError] = useState('');   // ✅ ADDED
   const [success, setSuccess] = useState(''); // ✅ ADDED
+  const [showPassword, setShowPassword] = useState(false); // ✅ NEW
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,7 +20,7 @@ export default function Login() {
     e.preventDefault();
 
     if (!form.emailOrUsername || !form.password) {
-      setError('⚠ Please fill in all fields.');  // ✅ ADDED
+      setError('⚠ You must not leave any field blank');  // ✅ ADDED
       setSuccess('');                            // ✅ ADDED
       return;
     }
@@ -49,7 +50,7 @@ export default function Login() {
           onChange={handleChange}
           className="w-full p-3 rounded-lg bg-white/20 placeholder-white text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
-
+{/* 
         <input
           type="password"
           name="password"
@@ -57,8 +58,29 @@ export default function Login() {
           value={form.password}
           onChange={handleChange}
           className="w-full p-3 rounded-lg bg-white/20 placeholder-white text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        /> */}
+
+         {/* ✅ Password Input with toggleable type */}
+        <input
+          type={showPassword ? 'text' : 'password'}
+          name="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          className="w-full p-3 rounded-lg bg-white/20 placeholder-white text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
 
+        {/* ✅ Show Password toggle */}
+        <label className="flex items-center space-x-2 text-white text-sm">
+          <input
+            type="checkbox"
+            checked={showPassword}
+            onChange={() => setShowPassword(!showPassword)}
+            className="accent-indigo-400"
+          />
+          <span>Show password</span>
+        </label>  
+        
         <button
           type="submit"
           className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg transition font-semibold"

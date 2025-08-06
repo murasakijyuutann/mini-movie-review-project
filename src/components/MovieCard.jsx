@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import HomePage from './HomePage';
 
 export default function MovieCard({ id, original_title, posterPath, vote_count, vote_average }) {
   const [clicked, setClicked] = useState(false);

@@ -14,12 +14,35 @@ export default function Signup() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (form.password !== form.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
+
+    if ( !form.name ||!form.email || !form.password || !form.confirmPassword) {
+      alert("You must not leave any field blank");
+      return;
+    }
+
+    if (form.name || form.email || form.password || form.confirmPassword) {
+     
+      // ✅ Ask user for age confirmation
+       const isAdult = window.confirm("Are you 18 years old or older?");
+      if (!isAdult) {
+      alert("You must be 18 or older to sign up.");
+      return;
+      } else {
+        alert("Your new account has been successfully created!")
+      }
+    }
+    
+    
+
     console.log("Form submitted:", form);
   };
+
+  const [showPassword, setShowPassword] = useState(false); // ✅ NEW
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-indigo-900 to-black p-6">
@@ -27,7 +50,7 @@ export default function Signup() {
         onSubmit={handleSubmit}
         className="bg-white/10 backdrop-blur-lg p-10 rounded-xl w-full max-w-md shadow-lg space-y-6 border border-indigo-400/30"
       >
-        <h2 className="text-2xl font-bold text-indigo-200 text-center">Sign Up</h2>
+        <h2 className="text-2xl font-bold text-indigo-200 text-center">Ready to register?</h2>
 
         {/* 이름 */}
         <input
@@ -49,9 +72,9 @@ export default function Signup() {
           className="w-full p-3 rounded-lg bg-white/20 placeholder-white text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
 
-        {/* 비밀번호 */}
+        {/* ✅ Password Input with toggleable type */}
         <input
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           name="password"
           placeholder="Password"
           value={form.password}
@@ -61,13 +84,24 @@ export default function Signup() {
 
         {/* 비밀번호 확인 */}
         <input
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           name="confirmPassword"
           placeholder="Confirm Password"
           value={form.confirmPassword}
           onChange={handleChange}
           className="w-full p-3 rounded-lg bg-white/20 placeholder-white text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
+
+        {/* ✅ Show Password toggle */}
+        <label className="flex items-center space-x-2 text-white text-sm">
+          <input
+            type="checkbox"
+            checked={showPassword}
+            onChange={() => setShowPassword(!showPassword)}
+            className="accent-indigo-400"
+          />
+          <span>Show password</span>
+        </label>  
 
         {/* 제출 버튼 */}
         <button
