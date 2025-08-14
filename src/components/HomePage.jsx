@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import MovieCard from "./MovieCard";
 import axios from 'axios';
 
-export default function HomePage() {
+export default function HomePage({ logoutMsg }) {
   const [movies, setMovies] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -11,28 +11,33 @@ export default function HomePage() {
   const observer = useRef();
   const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
-  useEffect(() => {
-    const fetchMovies = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get('https://api.themoviedb.org/3/movie/popular', {
-          params: {
-            api_key: apiKey,
-            language: 'ja-JP',
-            page: page,
-          },
-        });
+useEffect(() => {
+  const fetchMovies = () => {
+    setLoading(true);
 
+    axios
+      .get('https://api.themoviedb.org/3/movie/popular', {
+        params: {
+          api_key: apiKey,
+          language: 'en-EN',
+          page: page,
+        },
+      })
+      .then((response) => {
         setMovies((prev) => [...prev, ...response.data.results]);
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error('Error fetching movies:', error);
-      } finally {
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
+      });
+  };
 
-    fetchMovies();
-  }, [page, apiKey]);
+  fetchMovies();
+}, [apiKey, page]);
+
+
 
   const lastMovieRef = useCallback(
     (node) => {
@@ -68,6 +73,12 @@ export default function HomePage() {
       <h1 className="text-4xl font-[Georgia,_serif] text-center text-indigo-300 mb-10 tracking-widest drop-shadow-[0_2px_6px_rgba(99,102,241,0.6)]">
         Movie Explorer
       </h1>
+
+      {logoutMsg && (
+  <div className="mb-4 p-3 bg-yellow-500/20 text-yellow-200 rounded">
+    {logoutMsg}
+  </div>
+)}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {movies.map((movie, index) => {
