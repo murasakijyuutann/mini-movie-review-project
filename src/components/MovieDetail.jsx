@@ -1,4 +1,3 @@
-// src/components/MovieDetail.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -7,13 +6,11 @@ export default function MovieDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // ---- ENV / CONSTANTS ----------------------------------------------------
   const apiKey = import.meta.env.VITE_TMDB_API_KEY;
   const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
-  const movieId = String(id); // safe even before fetch
+  const movieId = String(id);
   const TMDB_IMG = 'https://image.tmdb.org/t/p/w500';
 
-  // ---- AUTH (logged-in user from localStorage) ----------------------------
   const user = (() => {
     try {
       return JSON.parse(localStorage.getItem('user') || 'null');
@@ -22,45 +19,40 @@ export default function MovieDetail() {
     }
   })();
 
-  // ---- STATE --------------------------------------------------------------
-  // movie
   const [movie, setMovie] = useState(null);
   const [notFound, setNotFound] = useState(false);
-
-  // favorites
   const [saved, setSaved] = useState(false);
-
-  // reviews (create)
   const [reviews, setReviews] = useState([]);
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(0);
   const [busy, setBusy] = useState(false);
-
-  // reviews (edit)
   const [editId, setEditId] = useState(null);
   const [editContent, setEditContent] = useState('');
   const [editRating, setEditRating] = useState(0);
   const [editBusy, setEditBusy] = useState(false);
 
-  // ---- EFFECTS ------------------------------------------------------------
-  // Load movie details (axios, ja-JP like your original)
   useEffect(() => {
+    if (!id) {
+      console.error('Missing ID from URL');
+      return;
+    }
+
     const fetchMovieDetail = async () => {
       try {
         const res = await axios.get(`https://api.themoviedb.org/3/movie/${id}`, {
-          params: { api_key: apiKey, language: 'en-EN' },
+          params: { api_key: apiKey, language: 'en-US' }, // ✅ FIXED
         });
         setMovie(res.data);
         setNotFound(false);
       } catch (error) {
-        console.error('Movie not found or other error:', error);
+        console.error('Movie not found or error fetching:', error);
         setNotFound(true);
       }
     };
+
     fetchMovieDetail();
   }, [id, apiKey]);
 
-  // Check favorite status (only if logged in)
   useEffect(() => {
     if (!user) return;
     fetch(`${base}/api/users/${user.id}/favorites/${movieId}`)
@@ -69,7 +61,6 @@ export default function MovieDetail() {
       .catch(() => {});
   }, [movieId, user?.id]);
 
-  // Load reviews for this movie
   useEffect(() => {
     (async () => {
       try {
@@ -81,8 +72,6 @@ export default function MovieDetail() {
     })();
   }, [movieId]);
 
-  // ---- HANDLERS -----------------------------------------------------------
-  // Toggle favorite
   const toggleFavorite = async () => {
     if (!user) {
       const go = window.confirm('Log in to save favorites?');
@@ -108,7 +97,6 @@ export default function MovieDetail() {
     }
   };
 
-  // Submit a review (login required)
   const submitReview = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -123,9 +111,9 @@ export default function MovieDetail() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: user.id, // server verifies user exists
+          userId: user.id,
           content: content.trim(),
-          rating: rating ? Number(rating) : null, // 1..10 optional
+          rating: rating ? Number(rating) : null,
         }),
       });
       const data = await r.json().catch(() => ({}));
@@ -133,7 +121,6 @@ export default function MovieDetail() {
         alert(data?.message || 'Failed to submit review');
         return;
       }
-      // Prepend the new review
       setReviews((prev) => [data, ...prev]);
       setContent('');
       setRating(0);
@@ -144,25 +131,21 @@ export default function MovieDetail() {
     }
   };
 
-  // Start editing a review
   const startEdit = (r) => {
     setEditId(r.id);
     setEditContent(r.content);
     setEditRating(r.rating || 0);
   };
 
-  // Cancel edit
   const cancelEdit = () => {
     setEditId(null);
     setEditContent('');
     setEditRating(0);
   };
 
-  // Save edit (PUT /api/reviews/:id)
   const saveEdit = async (e) => {
     e.preventDefault();
-    if (!user || !editId) return;
-    if (!editContent.trim()) return;
+    if (!user || !editId || !editContent.trim()) return;
 
     try {
       setEditBusy(true);
@@ -170,7 +153,7 @@ export default function MovieDetail() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: user.id, // server checks ownership
+          userId: user.id,
           content: editContent.trim(),
           rating: editRating ? Number(editRating) : null,
         }),
@@ -180,7 +163,6 @@ export default function MovieDetail() {
         alert(data?.message || 'Failed to update review');
         return;
       }
-      // Replace the edited item in state
       setReviews((prev) => prev.map((x) => (x.id === editId ? { ...x, ...data } : x)));
       cancelEdit();
     } catch {
@@ -190,16 +172,14 @@ export default function MovieDetail() {
     }
   };
 
-  // Delete a review (only by the author)
   const deleteReview = async (reviewId) => {
-    if (!user) return;
-    if (!window.confirm('このレビューを削除しますか？')) return;
+    if (!user || !window.confirm('このレビューを削除しますか？')) return;
 
     try {
       const r = await fetch(`${base}/api/reviews/${reviewId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }), // server checks ownership
+        body: JSON.stringify({ userId: user.id }),
       });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) {
@@ -212,36 +192,30 @@ export default function MovieDetail() {
     }
   };
 
-  // ---- RENDER -------------------------------------------------------------
   if (notFound) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white p-8 space-y-10 text-xl">
+      <div className="min-h-screen flex items-center justify-center text-white p-8 text-xl">
         🎬 Movie with that ID does not exist.
       </div>
     );
   }
 
-  if (!movie) {
-    return <div className="text-white p-4">Loading...</div>;
-  }
+  if (!movie) return <div className="text-white p-4">Loading...</div>;
 
   const { title, poster_path, genres = [], vote_average, overview } = movie;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white p-8 space-y-10">
-      {/* Movie Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
         <img
-          src={poster_path ? `${TMDB_IMG}${poster_path}` : ''}
+          src={poster_path ? `${TMDB_IMG}${poster_path}` : '/fallback.jpg'}
           alt={title}
           className="w-full max-w-md mx-auto rounded-lg shadow-2xl ring-2 ring-indigo-400/50 transition-transform hover:scale-105 duration-300"
         />
-
         <div className="max-w-xl mx-auto space-y-6">
           <div className="text-4xl font-extrabold tracking-wide text-indigo-300 drop-shadow-[0_1px_5px_rgba(99,102,241,0.8)]">
             {title}
           </div>
-
           <button
             onClick={toggleFavorite}
             className={`px-4 py-2 rounded-lg font-semibold transition ${
@@ -250,20 +224,14 @@ export default function MovieDetail() {
           >
             {saved ? 'Saved ★' : 'Save to Favorites ☆'}
           </button>
-
           <div className="text-indigo-100 text-sm tracking-wide uppercase">
             {genres.map((g) => g.name).join(' • ')}
           </div>
-
           <p className="text-yellow-300 font-semibold text-lg">⭐ {vote_average} / 10</p>
-
-          <p className="text-gray-200 leading-relaxed border-l-4 border-indigo-500 pl-4 italic">
-            {overview}
-          </p>
+          <p className="text-gray-200 leading-relaxed border-l-4 border-indigo-500 pl-4 italic">{overview}</p>
         </div>
       </div>
 
-      {/* Review Form (login-only) */}
       {user ? (
         <form onSubmit={submitReview} className="mt-6 space-y-3 bg-white/10 p-4 rounded-lg">
           <textarea
@@ -300,10 +268,8 @@ export default function MovieDetail() {
         <div className="mt-6 text-white/70">ログインするとレビューを書けます。</div>
       )}
 
-      {/* Reviews list */}
       <div className="mt-6 space-y-3">
         <h3 className="text-xl font-semibold text-indigo-200">Reviews</h3>
-
         {reviews.length === 0 ? (
           <div className="text-white/70">No reviews yet.</div>
         ) : (
@@ -313,7 +279,6 @@ export default function MovieDetail() {
 
             return (
               <div key={r.id} className="bg-white/10 p-4 rounded-lg">
-                {/* Header row */}
                 <div className="flex items-center justify-between">
                   <div className="text-white font-semibold">{r.author}</div>
                   <div className="text-white/60 text-sm">
@@ -325,7 +290,6 @@ export default function MovieDetail() {
                   </div>
                 </div>
 
-                {/* Content or editor */}
                 {!isEditing ? (
                   <p className="text-white/90 mt-2 whitespace-pre-wrap">{r.content}</p>
                 ) : (
@@ -370,7 +334,6 @@ export default function MovieDetail() {
                   </form>
                 )}
 
-                {/* Author actions */}
                 {mine && !isEditing && (
                   <div className="mt-2 flex gap-2">
                     <button
